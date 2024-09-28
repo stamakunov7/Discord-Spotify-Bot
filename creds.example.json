@@ -1,0 +1,8 @@
+{
+    "discord_token": "YOUR_DISCORD_TOKEN",
+    "spotify": {
+        "client_id": "YOUR_SPOTIFY_CLIENT_ID",
+        "client_secret": "YOUR_SPOTIFY_CLIENT_SECRET", 
+        "redirect_uri": "http://localhost:8888/callback"
+    }
+}
