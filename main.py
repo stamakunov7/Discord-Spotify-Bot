@@ -319,31 +319,34 @@ async def playlist_tracks(ctx, playlist_number: int):
 @bot.command()
 async def play_track(ctx, playlist_number: int, track_number: int):
     """Play a specific track from a Spotify playlist"""
-    # Check if user is in a voice channel
+    # Check if user is in voice channel
     if not ctx.author.voice:
         await ctx.send("You must be in a voice channel to play music.")
         return
 
-    # Ensure bot is in the voice channel
-    voice_channel = ctx.author.voice.channel
-    if not ctx.voice_client:
-        await voice_channel.connect()
-
+    # Get token and validate
     token_info = token_manager.get_token(ctx.author.id)
     if not token_info:
-        await ctx.send("You need to log in first. Use $login command.")
+        await ctx.send("Please log in first using $login")
         return
 
     try:
+        # Connect to voice channel if not connected
+        if not ctx.voice_client:
+            await ctx.author.voice.channel.connect()
+        elif ctx.voice_client.channel != ctx.author.voice.channel:
+            await ctx.voice_client.move_to(ctx.author.voice.channel)
+
+        # Initialize Spotify client
         sp = spotipy.Spotify(auth=token_info['access_token'])
         
-        # Get playlists and validate playlist number
+        # Get playlist
         playlists = sp.current_user_playlists()
         if playlist_number < 1 or playlist_number > len(playlists['items']):
             await ctx.send("Invalid playlist number.")
             return
 
-        # Get tracks from selected playlist
+        # Get tracks
         selected_playlist = playlists['items'][playlist_number - 1]
         tracks = sp.playlist_tracks(selected_playlist['id'])
         
@@ -351,33 +354,40 @@ async def play_track(ctx, playlist_number: int, track_number: int):
             await ctx.send("Invalid track number.")
             return
 
-        # Get the selected track
+        # Get track info
         track = tracks['items'][track_number - 1]['track']
         search_query = f"{track['name']} {track['artists'][0]['name']}"
-
-        # Extract audio from YouTube
-        audio_url = await youtube_extractor.extract_audio(search_query)
         
+        # Get YouTube URL
+        audio_url = await youtube_extractor.extract_audio(search_query)
         if not audio_url:
-            await ctx.send("Could not find audio for the track.")
+            await ctx.send("Could not find audio for this track.")
             return
 
-        # Play the audio
+        # Setup FFmpeg options
+        FFMPEG_OPTIONS = {
+            'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
+            'options': '-vn -af "volume=0.5"'  # Add volume control
+        }
+
+        # Play audio
         def after_playing(error):
             if error:
                 logger.error(f"Playback error: {error}")
-            asyncio.run_coroutine_threadsafe(ctx.voice_client.disconnect(), bot.loop)
 
         ctx.voice_client.play(
-            discord.FFmpegPCMAudio(audio_url), 
+            discord.FFmpegPCMAudio(audio_url, **FFMPEG_OPTIONS),
             after=after_playing
         )
         
         await ctx.send(f"Now playing: {track['name']} by {track['artists'][0]['name']}")
 
+    except spotipy.SpotifyException as e:
+        logger.error(f"Spotify API error: {e}")
+        await ctx.send("Spotify API error occurred. Please try again.")
     except Exception as e:
-        logger.error(f"Track playback error: {e}")
-        await ctx.send(f"Error playing track: {e}")
+        logger.error(f"Playback error: {e}")
+        await ctx.send("An error occurred while trying to play the track.")
 
 @bot.command()
 async def join(ctx):
