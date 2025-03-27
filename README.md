@@ -26,9 +26,9 @@ A Discord bot that integrates with Spotify, allowing users to control and share 
 ## Configuration
 
 Create a `.env` file in the root directory with the following:
-DISCORD_TOKEN=your_discord_bot_token
-SPOTIFY_CLIENT_ID=your_spotify_client_id
-SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
+- DISCORD_TOKEN=your_discord_bot_token
+- SPOTIFY_CLIENT_ID=your_spotify_client_id
+- SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
 
 ## Usage
 
