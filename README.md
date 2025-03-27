@@ -10,6 +10,12 @@ A Discord bot that integrates with Spotify, allowing users to control and share 
 - Share playlists
 - Control volume
 
+## Requirements
+- Python 3.9 or later
+- FFmpeg installed
+- Spotify Developer account
+- Discord bot token
+
 ## Installation
 
 1. Clone the repository
@@ -26,12 +32,12 @@ SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
 
 ## Usage
 
-- `/play <song name>`: Play a song
-- `/pause`: Pause the current song
-- `/resume`: Resume playback
-- `/skip`: Skip to the next song
-- `/nowplaying`: Display the current song
-- `/queue <song name>`: Add a song to the queue
+- $login       - Connect your Spotify account
+- $playlists   - List your Spotify playlists
+- $play_track X Y - Play track Y from playlist X
+- $nowplaying  - Show currently playing track
+- $join        - Join your voice channel
+- $leave       - Leave voice channel
 
 ## Contributing
 
