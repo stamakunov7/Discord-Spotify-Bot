@@ -1,6 +1,6 @@
 # Discord Spotify Bot
 
-A Discord bot that integrates with Spotify, allowing users to control and share music within Discord servers.
+Play Spotify music in Discord voice channels
 
 ## Features
 
